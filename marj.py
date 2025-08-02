@@ -4,10 +4,10 @@ import pygame
 import sys
 import os
 
-# Global variable to store selected theme
-selected_theme = "Smurf"  # Default
+# Global variables
+selected_theme = "Smurf"  # Default\selected_character = "Papa Smurf"
 
-def run_game(theme):
+def run_game(theme, character):
     pygame.init()
 
     WIDTH, HEIGHT = 800, 600
@@ -23,23 +23,20 @@ def run_game(theme):
     background_img = pygame.image.load(background_paths[theme])
     background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 
-    # Character images
-    if theme == "Smurf":
-        player_img = pygame.image.load(r"C:\\xampp\\htdocs\\marj\\images\\papa smurf.png").convert_alpha()
-        enemy_img = pygame.image.load(r"C:\\xampp\\htdocs\\marj\\images\\smurfette.png").convert_alpha()
-    else:
-        player_img = pygame.Surface((50, 50))
-        player_img.fill((0, 0, 255))
-        enemy_img = pygame.Surface((50, 50))
-        enemy_img.fill((255, 0, 0))
-
-    player_img = pygame.transform.scale(player_img, (50, 50))
-    enemy_img = pygame.transform.scale(enemy_img, (50, 50))
-
     # Colors
+    WHITE = (255, 255, 255)
+    BLUE = (0, 0, 255)
     GREEN = (0, 200, 0)
-    YELLOW = (255, 215, 0)
     RED = (200, 0, 0)
+    YELLOW = (255, 215, 0)
+
+    # Load player image based on selected character
+    character_paths = {
+        "Papa Smurf": "C:/xampp/htdocs/marj/images/papa smurf.png",
+        "Smurfette": "C:/xampp/htdocs/marj/images/smurfette.png",
+    }
+    player_image = pygame.image.load(character_paths[character])
+    player_image = pygame.transform.scale(player_image, (50, 50))
 
     # Player setup
     player = pygame.Rect(100, 500, 50, 50)
@@ -49,7 +46,7 @@ def run_game(theme):
     player_speed = 5
     on_ground = False
 
-    # Enemy setup
+    # Enemy setup (still a red box)
     enemy = pygame.Rect(700, 500, 50, 50)
     enemy_speed = 2
 
@@ -138,22 +135,19 @@ def run_game(theme):
         for plat in platforms:
             pygame.draw.rect(screen, GREEN, plat)
         pygame.draw.rect(screen, YELLOW, finish_line)
-        screen.blit(player_img, (player.x, player.y))
-        screen.blit(enemy_img, (enemy.x, enemy.y))
+        screen.blit(player_image, player)
+        pygame.draw.rect(screen, RED, enemy)
 
         pygame.display.update()
         clock.tick(60)
 
     pygame.quit()
-    show_try_again_screen(result_message, theme)
+    show_try_again_screen(result_message, theme, character)
 
-# ---------------------------
-# Try Again Screen (Tkinter)
-# ---------------------------
-def show_try_again_screen(result_message, theme):
+def show_try_again_screen(result_message, theme, character):
     def try_again():
         root.destroy()
-        run_game(theme)
+        run_game(theme, character)
 
     def exit_game():
         root.destroy()
@@ -174,41 +168,47 @@ def show_try_again_screen(result_message, theme):
 
     root.mainloop()
 
-# ---------------------
-# Main Menu (Tkinter)
-# ---------------------
 def start_game():
-    global selected_theme
+    global selected_theme, selected_character
     root.destroy()
-    run_game(selected_theme.get())
+    run_game(selected_theme.get(), selected_character.get())
 
 root = tk.Tk()
 root.title("Platformer Menu")
-root.geometry("300x250")
+root.geometry("300x300")
 
 # Load and show menu background image
 menu_bg_img = Image.open("img/smurf_background.png")
-menu_bg_img = menu_bg_img.resize((300, 250))
+menu_bg_img = menu_bg_img.resize((300, 300))
 menu_bg_photo = ImageTk.PhotoImage(menu_bg_img)
 
 bg_label = tk.Label(root, image=menu_bg_photo)
-bg_label.image = menu_bg_photo
+bg_label.image = menu_bg_photo  # Prevent garbage collection
 bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-# Theme selection UI
-label = tk.Label(root, text="Choose a Theme:", font=("Arial", 12), bg="white")
-label.place(relx=0.5, y=30, anchor="center")
+# Theme selection
+label_theme = tk.Label(root, text="Choose a Theme:", font=("Arial", 12), bg="white")
+label_theme.place(relx=0.5, y=30, anchor="center")
 
 themes = ["Smurf", "Monsters Inc"]
 selected_theme = tk.StringVar(value="Smurf")
 theme_menu = tk.OptionMenu(root, selected_theme, *themes)
 theme_menu.place(relx=0.5, y=60, anchor="center")
 
+# Character selection
+label_character = tk.Label(root, text="Choose Character:", font=("Arial", 12), bg="white")
+label_character.place(relx=0.5, y=100, anchor="center")
+
+characters = ["Papa Smurf", "Smurfette"]
+selected_character = tk.StringVar(value="Papa Smurf")
+character_menu = tk.OptionMenu(root, selected_character, *characters)
+character_menu.place(relx=0.5, y=130, anchor="center")
+
 # Start and Exit buttons
 start_button = tk.Button(root, text="Start Game", font=("Arial", 12), command=start_game)
-start_button.place(relx=0.5, y=120, anchor="center")
+start_button.place(relx=0.5, y=190, anchor="center")
 
 exit_button = tk.Button(root, text="Exit", font=("Arial", 12), command=root.quit)
-exit_button.place(relx=0.5, y=160, anchor="center")
+exit_button.place(relx=0.5, y=230, anchor="center")
 
 root.mainloop()
