@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import pygame
 import sys
+import os
 
 # Global variable to store selected theme
 selected_theme = "Smurf"  # Default
@@ -22,12 +23,23 @@ def run_game(theme):
     background_img = pygame.image.load(background_paths[theme])
     background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 
+    # Character images
+    if theme == "Smurf":
+        player_img = pygame.image.load(r"C:\\xampp\\htdocs\\marj\\images\\papa smurf.png").convert_alpha()
+        enemy_img = pygame.image.load(r"C:\\xampp\\htdocs\\marj\\images\\smurfette.png").convert_alpha()
+    else:
+        player_img = pygame.Surface((50, 50))
+        player_img.fill((0, 0, 255))
+        enemy_img = pygame.Surface((50, 50))
+        enemy_img.fill((255, 0, 0))
+
+    player_img = pygame.transform.scale(player_img, (50, 50))
+    enemy_img = pygame.transform.scale(enemy_img, (50, 50))
+
     # Colors
-    WHITE = (255, 255, 255)
-    BLUE = (0, 0, 255)
     GREEN = (0, 200, 0)
-    RED = (200, 0, 0)
     YELLOW = (255, 215, 0)
+    RED = (200, 0, 0)
 
     # Player setup
     player = pygame.Rect(100, 500, 50, 50)
@@ -126,8 +138,8 @@ def run_game(theme):
         for plat in platforms:
             pygame.draw.rect(screen, GREEN, plat)
         pygame.draw.rect(screen, YELLOW, finish_line)
-        pygame.draw.rect(screen, BLUE, player)
-        pygame.draw.rect(screen, RED, enemy)
+        screen.blit(player_img, (player.x, player.y))
+        screen.blit(enemy_img, (enemy.x, enemy.y))
 
         pygame.display.update()
         clock.tick(60)
@@ -175,12 +187,12 @@ root.title("Platformer Menu")
 root.geometry("300x250")
 
 # Load and show menu background image
-menu_bg_img = Image.open("img/smurf_background.png")  # You can reuse smurf_background if needed
+menu_bg_img = Image.open("img/smurf_background.png")
 menu_bg_img = menu_bg_img.resize((300, 250))
 menu_bg_photo = ImageTk.PhotoImage(menu_bg_img)
 
 bg_label = tk.Label(root, image=menu_bg_photo)
-bg_label.image = menu_bg_photo  # Prevent image garbage collection
+bg_label.image = menu_bg_photo
 bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 # Theme selection UI
