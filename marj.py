@@ -1,7 +1,7 @@
 import tkinter as tk
 import pygame
 import sys
-#ganito mag sync hahahahahah
+
 def run_game():
     pygame.init()
 
@@ -15,6 +15,10 @@ def run_game():
     GREEN = (0, 200, 0)
     RED = (200, 0, 0)
     YELLOW = (255, 215, 0)
+
+    # Load and scale background image
+    background_img = pygame.image.load("img/smurf_background.png")  # Make sure this file exists
+    background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 
     # Player setup
     player = pygame.Rect(100, 500, 50, 50)
@@ -38,14 +42,14 @@ def run_game():
     ]
 
     # Finish line
-    finish_line = pygame.Rect(WIDTH - 70, HEIGHT - 70, 40, 50)  # Near right-bottom corner
+    finish_line = pygame.Rect(WIDTH - 70, HEIGHT - 70, 40, 50)
 
     clock = pygame.time.Clock()
     running = True
     result_message = ""
 
     while running:
-        screen.fill(WHITE)
+        screen.blit(background_img, (0, 0))  # Draw background image
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -113,7 +117,7 @@ def run_game():
         for plat in platforms:
             pygame.draw.rect(screen, GREEN, plat)
 
-        # Draw finish line (yellow)
+        # Draw finish line
         pygame.draw.rect(screen, YELLOW, finish_line)
 
         # Draw player and enemy
