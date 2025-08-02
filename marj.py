@@ -1,13 +1,26 @@
 import tkinter as tk
+from PIL import Image, ImageTk
 import pygame
 import sys
 
-def run_game():
+# Global variable to store selected theme
+selected_theme = "Smurf"  # Default
+
+def run_game(theme):
     pygame.init()
 
     WIDTH, HEIGHT = 800, 600
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Platformer - Finish Line")
+
+    # Theme-based background image
+    background_paths = {
+        "Smurf": "img/smurf_background.png",
+        "Monsters Inc": "img/monsters_background.png",
+    }
+
+    background_img = pygame.image.load(background_paths[theme])
+    background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 
     # Colors
     WHITE = (255, 255, 255)
@@ -15,10 +28,6 @@ def run_game():
     GREEN = (0, 200, 0)
     RED = (200, 0, 0)
     YELLOW = (255, 215, 0)
-
-    # Load and scale background image
-    background_img = pygame.image.load("img/smurf_background.png")  # Make sure this file exists
-    background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 
     # Player setup
     player = pygame.Rect(100, 500, 50, 50)
@@ -49,7 +58,7 @@ def run_game():
     result_message = ""
 
     while running:
-        screen.blit(background_img, (0, 0))  # Draw background image
+        screen.blit(background_img, (0, 0))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -66,11 +75,11 @@ def run_game():
             velocity_y = -jump_power
             on_ground = False
 
-        # Gravity for player
+        # Gravity
         velocity_y += gravity
         player.y += velocity_y
 
-        # Player collision with platforms
+        # Collision with platforms
         on_ground = False
         for plat in platforms:
             if player.colliderect(plat):
@@ -79,7 +88,7 @@ def run_game():
                     velocity_y = 0
                     on_ground = True
 
-        # Enemy chases player horizontally
+        # Enemy AI
         if enemy.x < player.x:
             enemy.x += enemy_speed
         elif enemy.x > player.x:
@@ -93,7 +102,7 @@ def run_game():
                     enemy.bottom = plat.top
                     break
 
-        # Check collision: player & enemy = game over
+        # Game Over condition
         if player.colliderect(enemy):
             font = pygame.font.SysFont(None, 72)
             text = font.render("Game Over!", True, RED)
@@ -103,7 +112,7 @@ def run_game():
             result_message = "Game Over!"
             running = False
 
-        # Check collision: player & finish line = win
+        # Win condition
         if player.colliderect(finish_line):
             font = pygame.font.SysFont(None, 72)
             text = font.render("You Win!", True, (0, 150, 0))
@@ -113,14 +122,10 @@ def run_game():
             result_message = "You Win!"
             running = False
 
-        # Draw platforms
+        # Draw game objects
         for plat in platforms:
             pygame.draw.rect(screen, GREEN, plat)
-
-        # Draw finish line
         pygame.draw.rect(screen, YELLOW, finish_line)
-
-        # Draw player and enemy
         pygame.draw.rect(screen, BLUE, player)
         pygame.draw.rect(screen, RED, enemy)
 
@@ -128,15 +133,15 @@ def run_game():
         clock.tick(60)
 
     pygame.quit()
-    show_try_again_screen(result_message)
+    show_try_again_screen(result_message, theme)
 
-# -------------------------------
-# Show Try Again screen (Tkinter)
-# -------------------------------
-def show_try_again_screen(result_message):
+# ---------------------------
+# Try Again Screen (Tkinter)
+# ---------------------------
+def show_try_again_screen(result_message, theme):
     def try_again():
         root.destroy()
-        run_game()
+        run_game(theme)
 
     def exit_game():
         root.destroy()
@@ -161,20 +166,37 @@ def show_try_again_screen(result_message):
 # Main Menu (Tkinter)
 # ---------------------
 def start_game():
+    global selected_theme
     root.destroy()
-    run_game()
+    run_game(selected_theme.get())
 
 root = tk.Tk()
 root.title("Platformer Menu")
-root.geometry("300x200")
+root.geometry("300x250")
 
-label = tk.Label(root, text="Welcome to the Platformer!", font=("Arial", 14))
-label.pack(pady=20)
+# Load and show menu background image
+menu_bg_img = Image.open("img/smurf_background.png")  # You can reuse smurf_background if needed
+menu_bg_img = menu_bg_img.resize((300, 250))
+menu_bg_photo = ImageTk.PhotoImage(menu_bg_img)
 
+bg_label = tk.Label(root, image=menu_bg_photo)
+bg_label.image = menu_bg_photo  # Prevent image garbage collection
+bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+# Theme selection UI
+label = tk.Label(root, text="Choose a Theme:", font=("Arial", 12), bg="white")
+label.place(relx=0.5, y=30, anchor="center")
+
+themes = ["Smurf", "Monsters Inc"]
+selected_theme = tk.StringVar(value="Smurf")
+theme_menu = tk.OptionMenu(root, selected_theme, *themes)
+theme_menu.place(relx=0.5, y=60, anchor="center")
+
+# Start and Exit buttons
 start_button = tk.Button(root, text="Start Game", font=("Arial", 12), command=start_game)
-start_button.pack(pady=10)
+start_button.place(relx=0.5, y=120, anchor="center")
 
 exit_button = tk.Button(root, text="Exit", font=("Arial", 12), command=root.quit)
-exit_button.pack(pady=5)
+exit_button.place(relx=0.5, y=160, anchor="center")
 
 root.mainloop()
