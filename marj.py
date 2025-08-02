@@ -1,7 +1,7 @@
 import tkinter as tk
 import pygame
 import sys
-#ganito mag sync
+#ganito mag sync hahahahahah
 def run_game():
     pygame.init()
 
