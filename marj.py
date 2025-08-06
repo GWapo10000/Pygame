@@ -178,7 +178,7 @@ root.title("Platformer Menu")
 root.geometry("300x300")
 
 # Load and show menu background image
-menu_bg_img = Image.open("img/smurf_background.png")
+menu_bg_img = Image.open("img\smurf_background.png")
 menu_bg_img = menu_bg_img.resize((300, 300))
 menu_bg_photo = ImageTk.PhotoImage(menu_bg_img)
 
