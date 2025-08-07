@@ -4,19 +4,15 @@ import pygame
 import sys
 import os
 
-# Global variables
 selected_theme = "Smurf"
 
-def run_game(theme, character):
+def run_game(level, theme, character):
     pygame.init()
-
-    # Fullscreen display
     infoObject = pygame.display.Info()
     WIDTH, HEIGHT = infoObject.current_w, infoObject.current_h
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-    pygame.display.set_caption("Platformer - Finish Line")
+    pygame.display.set_caption(f"Platformer - Level {level}")
 
-    # Backgrounds
     background_paths = {
         "Smurf": "img/smurf_background.png",
         "Monsters Inc": "img/monsters_background.png",
@@ -25,14 +21,11 @@ def run_game(theme, character):
     background_img = pygame.image.load(background_paths[theme])
     background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 
-    # Colors
     WHITE = (255, 255, 255)
-    BLUE = (0, 0, 255)
     GREEN = (0, 200, 0)
     RED = (200, 0, 0)
     YELLOW = (255, 215, 0)
 
-    # Load character
     character_paths = {
         "Papa Smurf": "C:/xampp/htdocs/marj/images/papa smurf.png",
         "Smurfette": "C:/xampp/htdocs/marj/images/smurfette.png",
@@ -41,7 +34,6 @@ def run_game(theme, character):
     player_image = pygame.image.load(character_paths[character])
     player_image = pygame.transform.scale(player_image, (50, 50))
 
-    # Player setup
     player = pygame.Rect(100, HEIGHT - 100, 50, 50)
     velocity_y = 0
     gravity = 1
@@ -49,28 +41,40 @@ def run_game(theme, character):
     player_speed = 8
     on_ground = False
 
-    # Enemy setup
     enemy = pygame.Rect(WIDTH - 100, HEIGHT - 100, 50, 50)
     enemy_speed = 2
 
-    # Platforms
-    platforms = [
-        pygame.Rect(0, HEIGHT - 20, WIDTH, 20),
-        pygame.Rect(int(WIDTH * 0.12), HEIGHT - 80, 150, 20),
-        pygame.Rect(int(WIDTH * 0.35), HEIGHT - 140, 150, 20),
-        pygame.Rect(int(WIDTH * 0.60), HEIGHT - 200, 150, 20),
-        pygame.Rect(int(WIDTH * 0.25), HEIGHT - 280, 150, 20),
-    ]
+    if level == 1:
+        platforms = [
+            pygame.Rect(0, HEIGHT - 20, WIDTH, 20),
+            pygame.Rect(int(WIDTH * 0.12), HEIGHT - 100, 150, 20),
+            pygame.Rect(int(WIDTH * 0.35), HEIGHT - 150, 150, 20),
+            pygame.Rect(int(WIDTH * 0.60), HEIGHT - 210, 150, 20),
+            pygame.Rect(int(WIDTH * 0.25), HEIGHT - 280, 150, 20),
+        ]
+        finish_line = pygame.Rect(WIDTH - 70, HEIGHT - 70, 40, 50)
 
-    # Finish line
-    finish_line = pygame.Rect(WIDTH - 70, HEIGHT - 70, 40, 50)
+    elif level == 2:
+        # Lowered platforms for better reachability
+        platforms = [
+            pygame.Rect(0, HEIGHT - 20, WIDTH, 20),
+            pygame.Rect(WIDTH // 4, HEIGHT - 100, 110, 20),
+            pygame.Rect(WIDTH // 2, HEIGHT - 140, 110, 20),
+            pygame.Rect(WIDTH // 3, HEIGHT - 200, 110, 20),
+            pygame.Rect(WIDTH // 1.5, HEIGHT - 230, 100, 20),
+        ]
+        finish_line = pygame.Rect(int(WIDTH * 0.85), HEIGHT // 2, 40, 50)
 
     clock = pygame.time.Clock()
     running = True
     result_message = ""
 
+    font_level = pygame.font.SysFont(None, 36)
+
     while running:
         screen.blit(background_img, (0, 0))
+        level_text = font_level.render(f"Level {level}", True, WHITE)
+        screen.blit(level_text, (20, 20))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -89,17 +93,14 @@ def run_game(theme, character):
             velocity_y = -jump_power
             on_ground = False
 
-        # Apply gravity
         velocity_y += gravity
         player.y += velocity_y
 
-        # Prevent falling below screen
         if player.bottom > HEIGHT:
             player.bottom = HEIGHT
             velocity_y = 0
             on_ground = True
 
-        # Collision with platforms
         on_ground = False
         for plat in platforms:
             if player.colliderect(plat):
@@ -108,13 +109,11 @@ def run_game(theme, character):
                     velocity_y = 0
                     on_ground = True
 
-        # Enemy AI
         if enemy.x < player.x:
             enemy.x += enemy_speed
         elif enemy.x > player.x:
             enemy.x -= enemy_speed
 
-        # Enemy gravity
         enemy.y += gravity
         for plat in platforms:
             if enemy.colliderect(plat):
@@ -122,7 +121,6 @@ def run_game(theme, character):
                     enemy.bottom = plat.top
                     break
 
-        # Game Over
         if player.colliderect(enemy):
             font = pygame.font.SysFont(None, 72)
             text = font.render("Game Over!", True, RED)
@@ -132,17 +130,20 @@ def run_game(theme, character):
             result_message = "Game Over!"
             running = False
 
-        # Win condition
         if player.colliderect(finish_line):
-            font = pygame.font.SysFont(None, 72)
-            text = font.render("You Win!", True, (0, 150, 0))
-            screen.blit(text, (WIDTH // 2 - 120, HEIGHT // 2 - 50))
-            pygame.display.update()
-            pygame.time.wait(2000)
-            result_message = "You Win!"
-            running = False
+            if level == 1:
+                pygame.time.wait(1000)
+                run_game(2, theme, character)
+                return
+            else:
+                font = pygame.font.SysFont(None, 72)
+                text = font.render("You Win!", True, (0, 150, 0))
+                screen.blit(text, (WIDTH // 2 - 120, HEIGHT // 2 - 50))
+                pygame.display.update()
+                pygame.time.wait(2000)
+                result_message = "You Win!"
+                running = False
 
-        # Draw everything
         for plat in platforms:
             pygame.draw.rect(screen, GREEN, plat)
         pygame.draw.rect(screen, YELLOW, finish_line)
@@ -158,7 +159,7 @@ def run_game(theme, character):
 def show_try_again_screen(result_message, theme, character):
     def try_again():
         root.destroy()
-        run_game(theme, character)
+        run_game(1, theme, character)
 
     def exit_game():
         root.destroy()
@@ -186,7 +187,7 @@ def show_try_again_screen(result_message, theme, character):
 def start_game():
     global selected_theme, selected_character
     root.destroy()
-    run_game(selected_theme.get(), selected_character.get())
+    run_game(1, selected_theme.get(), selected_character.get())
 
 # Main Menu
 root = tk.Tk()
