@@ -198,7 +198,7 @@ root.bind("<Escape>", lambda e: root.attributes("-fullscreen", False))
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
-menu_bg_img = Image.open("img/smurf_background.png")
+menu_bg_img = Image.open("img\smurf_background.png")
 menu_bg_img = menu_bg_img.resize((screen_width, screen_height))
 menu_bg_photo = ImageTk.PhotoImage(menu_bg_img)
 
@@ -229,5 +229,4 @@ start_button.place(relx=0.5, y=370, anchor="center")
 
 exit_button = tk.Button(root, text="Exit", font=("Arial", 24), command=root.quit)
 exit_button.place(relx=0.5, y=440, anchor="center")
-
 root.mainloop()
